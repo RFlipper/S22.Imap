@@ -1886,47 +1886,135 @@ namespace S22.Imap {
 			}
 		}
 
-		/// <summary>
-		/// Removes the specified set of IMAP message flags from the existing flag attributes of the
-		/// mail message with the specified unique identifier (UID).
-		/// </summary>
-		/// <param name="uid">The UID of the mail message to remove the flag attributes for.</param>
-		/// <param name="mailbox">The mailbox that contains the mail message. If this parameter is null,
-		/// the value of the DefaultMailbox property is used to determine the mailbox to operate
-		/// on.</param>
-		/// <param name="flags">One or multiple message flags from the MessageFlag  enumeration.</param>
-		/// <exception cref="BadServerResponseException">The mail message flags could not be removed.
-		/// The message property of the exception contains the error message returned by the
-		/// server.</exception>
-		/// <exception cref="ObjectDisposedException">The ImapClient object has been disposed.</exception>
-		/// <exception cref="IOException">There was a failure writing to or reading from the
-		/// network.</exception>
-		/// <exception cref="NotAuthenticatedException">The method was called in non-authenticated
-		/// state, i.e. before logging in.</exception>
-		/// <remarks>This method removes the specified set of flags from the existing set of flag
-		/// attributes of the message. If you wish to replace the old attributes, use the
-		/// <see cref="SetMessageFlags"/> method instead.</remarks>
-		/// <seealso cref="GetMessageFlags"/>
-		/// <seealso cref="SetMessageFlags"/>
-		/// <seealso cref="AddMessageFlags"/>
-		public void RemoveMessageFlags(uint uid, string mailbox, params MessageFlag[] flags) {
-			AssertValid();
-			lock (sequenceLock) {
-				PauseIdling();
-				SelectMailbox(mailbox);
-				string flagsString = "";
-				foreach (MessageFlag f in flags)
-					flagsString = flagsString + @"\" + f + " ";
-				string tag = GetTag();
-				string response = SendCommandGetResponse(tag + "UID STORE " + uid +
-					@" -FLAGS.SILENT (" + flagsString.Trim() + ")");
-				while (response.StartsWith("*"))
-					response = GetResponse();
-				ResumeIdling();
-				if (!IsResponseOK(response, tag))
-					throw new BadServerResponseException(response);
-			}
-		}
+        /// <summary>
+        /// Adds the specified set of IMAP keywords or custom flags to the existing flag attributes of the mail
+        /// message with the specified unique identifier (UID).
+        /// </summary>
+        /// <param name="uid">The UID of the mail message to add the flag attributes to.</param>
+        /// <param name="mailbox">The mailbox that contains the mail message. If this parameter is null,
+        /// the value of the DefaultMailbox property is used to determine the mailbox to operate
+        /// on.</param>
+        /// <param name="flags">One or multiple message flags.</param>
+        /// <exception cref="BadServerResponseException">The mail message flags could not be added. The
+        /// message property of the exception contains the error message returned by the
+        /// server.</exception>
+        /// <exception cref="ObjectDisposedException">The ImapClient object has been disposed.</exception>
+        /// <exception cref="IOException">There was a failure writing to or reading from the
+        /// network.</exception>
+        /// <exception cref="NotAuthenticatedException">The method was called in non-authenticated
+        /// state, i.e. before logging in.</exception>
+        /// <remarks>This method adds the specified set of flags to the existing set of flag attributes
+        /// of the message. If you wish to replace the old attributes, use the
+        /// <see cref="SetMessageFlags"/> method instead.</remarks>
+        /// <seealso cref="GetMessageFlags"/>
+        /// <seealso cref="SetMessageFlags"/>
+        /// <seealso cref="RemoveMessageFlags"/>
+        public void AddCustomMessageFlags(uint uid, string mailbox, params string[] flags) {
+            AssertValid();
+            lock (sequenceLock)
+            {
+                PauseIdling();
+                SelectMailbox(mailbox);
+                string flagsString = "";
+                foreach (string f in flags)
+                    flagsString = flagsString + @"" + f + " ";
+                string tag = GetTag();
+                string response = SendCommandGetResponse(tag + "UID STORE " + uid +
+                    @" +FLAGS.SILENT (" + flagsString.Trim() + ")");
+                while (response.StartsWith("*"))
+                    response = GetResponse();
+                ResumeIdling();
+                if (!IsResponseOK(response, tag))
+                    throw new BadServerResponseException(response);
+            }
+        }
+
+
+        /// <summary>
+        /// Remove the specified custom message flag from the existing flag attributes of the
+        /// mail message with the specified unique identifier (UID).
+        /// </summary>
+        /// <param name="uid">The UID of the mail message to remove the flag attributes for.</param>
+        /// <param name="mailbox">The mailbox that contains the mail message. If this parameter is null,
+        /// the value of the DefaultMailbox property is used to determine the mailbox to operate
+        /// on.</param>
+        /// <param name="flag">A custom message flag.</param>
+        /// <exception cref="BadServerResponseException">The mail message flags could not be removed.
+        /// The message property of the exception contains the error message returned by the
+        /// server.</exception>
+        /// <exception cref="ObjectDisposedException">The ImapClient object has been disposed.</exception>
+        /// <exception cref="IOException">There was a failure writing to or reading from the
+        /// network.</exception>
+        /// <exception cref="NotAuthenticatedException">The method was called in non-authenticated
+        /// state, i.e. before logging in.</exception>
+        /// <remarks>This method removes the specified set of flags from the existing set of flag
+        /// attributes of the message. If you wish to replace the old attributes, use the
+        /// <see cref="SetMessageFlags"/> method instead.</remarks>
+        /// <seealso cref="GetMessageFlags"/>
+        /// <seealso cref="SetMessageFlags"/>
+        /// <seealso cref="AddMessageFlags"/>
+        public void RemoveCustomMessageFlag(uint uid, string mailbox, string flag)
+        {
+            lock (sequenceLock)
+            {
+                PauseIdling();
+                SelectMailbox(mailbox);
+                string tag = GetTag();
+                string response = SendCommandGetResponse(tag + "UID STORE " + uid +
+                    @" -FLAGS.SILENT (" + flag.Trim() + ")");
+                while (response.StartsWith("*"))
+                    response = GetResponse();
+                ResumeIdling();
+                if (!IsResponseOK(response, tag))
+                    throw new BadServerResponseException(response);
+            }
+        }
+
+
+        /// <summary>
+        /// Removes the specified set of IMAP message flags from the existing flag attributes of the
+        /// mail message with the specified unique identifier (UID).
+        /// </summary>
+        /// <param name="uid">The UID of the mail message to remove the flag attributes for.</param>
+        /// <param name="mailbox">The mailbox that contains the mail message. If this parameter is null,
+        /// the value of the DefaultMailbox property is used to determine the mailbox to operate
+        /// on.</param>
+        /// <param name="flags">One or multiple message flags from the MessageFlag  enumeration.</param>
+        /// <exception cref="BadServerResponseException">The mail message flags could not be removed.
+        /// The message property of the exception contains the error message returned by the
+        /// server.</exception>
+        /// <exception cref="ObjectDisposedException">The ImapClient object has been disposed.</exception>
+        /// <exception cref="IOException">There was a failure writing to or reading from the
+        /// network.</exception>
+        /// <exception cref="NotAuthenticatedException">The method was called in non-authenticated
+        /// state, i.e. before logging in.</exception>
+        /// <remarks>This method removes the specified set of flags from the existing set of flag
+        /// attributes of the message. If you wish to replace the old attributes, use the
+        /// <see cref="SetMessageFlags"/> method instead.</remarks>
+        /// <seealso cref="GetMessageFlags"/>
+        /// <seealso cref="SetMessageFlags"/>
+        /// <seealso cref="AddMessageFlags"/>
+        public void RemoveMessageFlags(uint uid, string mailbox, params MessageFlag[] flags)
+        {
+            flags.Select(f => f.ToString());
+            AssertValid();
+            lock (sequenceLock)
+            {
+                PauseIdling();
+                SelectMailbox(mailbox);
+                string flagsString = "";
+                foreach (MessageFlag f in flags)
+                    flagsString = flagsString + @"\" + f + " ";
+                string tag = GetTag();
+                string response = SendCommandGetResponse(tag + "UID STORE " + uid +
+                    @" -FLAGS.SILENT (" + flagsString.Trim() + ")");
+                while (response.StartsWith("*"))
+                    response = GetResponse();
+                ResumeIdling();
+                if (!IsResponseOK(response, tag))
+                    throw new BadServerResponseException(response);
+            }
+        }
 
 		/// <summary>
 		/// Starts receiving of IMAP IDLE notifications from the IMAP server.
