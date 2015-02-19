@@ -306,9 +306,8 @@ namespace S22.Imap {
 		/// Ntlm, Scram-Sha-1, Digest-Md5, followed by Cram-Md5 and finally plaintext Login as
 		/// a last resort.</remarks>
 		string AuthAuto(string tag, string username, string password) {
-			string[] methods = new string[] { "Srp", "Ntlm", "ScramSha1", "DigestMd5",
-				"CramMd5" };
-			foreach (string m in methods) {
+			var methods = new []{ "Srp", "Ntlm", "ScramSha1", "DigestMd5", "CramMd5", "Plain" };
+			foreach (var m in methods) {
 				try {
 					string response = Authenticate(tag, username, password, m);
 					if (IsResponseOK(response, tag) || response.StartsWith("* CAPABILITY"))
