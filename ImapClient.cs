@@ -1087,8 +1087,7 @@ namespace S22.Imap {
 		/// </para>
 		/// </remarks>
 		/// <include file='Examples.xml' path='S22/Imap/ImapClient[@name="GetMessage-2"]/*'/>
-		public MailMessage GetMessage(uint uid, FetchOptions options,
-			bool seen = true, string mailbox = null) {
+		public MailMessage GetMessage(uint uid, FetchOptions options, bool seen = true, string mailbox = null) {
 			AssertValid();
 			switch (options) {
 				case FetchOptions.HeadersOnly:
@@ -1097,8 +1096,7 @@ namespace S22.Imap {
 					return GetMessage(uid, p => { return p.Disposition.Type !=
 						ContentDispositionType.Attachment; }, seen, mailbox);
 				case FetchOptions.TextOnly:
-					return GetMessage(uid, p => { return p.Type == ContentType.Text; },
-						seen, mailbox);
+					return GetMessage(uid, p => { return p.Type == ContentType.Text; }, seen, mailbox);
 				default:
 					return MessageBuilder.FromMIME822(GetMessageData(uid, seen, mailbox));
 			}
@@ -1392,6 +1390,9 @@ namespace S22.Imap {
 				ResumeIdling();
 				if (!IsResponseOK(response, tag))
 					throw new BadServerResponseException(response);
+
+			    builder.Append("X-MSG-UID: " + uid + "\n");
+
 				return builder.ToString();
 			}
 		}
@@ -1532,6 +1533,9 @@ namespace S22.Imap {
 				ResumeIdling();
 				if (!IsResponseOK(response, tag))
 					throw new BadServerResponseException(response);
+
+			    builder.Insert(0, "X-MSG-UID: " + uid + "\n");
+
 				return builder.ToString();
 			}
 		}
